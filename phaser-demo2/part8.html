@@ -31,6 +31,9 @@ var cursors;
 
 var stars;
 
+var score = 0
+var scoreText
+
 function create() {
 
     //  We're going to be using physics, so enable the Arcade Physics system
@@ -41,6 +44,7 @@ function create() {
 
     //  The platforms group contains the ground and the 2 ledges we can jump on
     platforms = game.add.group();
+    scoreText = game.add.text(16,16,'Score: 0', {fontSize: '32px', fill: '#000'})
 
     //  We will enable physics for any object that is created in this group
     platforms.enableBody = true;
@@ -96,6 +100,8 @@ function create() {
     }
 
     //  Our controls.
+
+    scoreText = game.add.text(16,16,'Score: 0', {fontSize: '32px', fill: '#000'})
     cursors = game.input.keyboard.createCursorKeys();
     
 }
@@ -146,6 +152,8 @@ function collectStar (player, star) {
     
     // Removes the star from the screen
     star.kill();
+    score += 10
+    scoreText.text = 'Score: ' + score
 
 }
 
