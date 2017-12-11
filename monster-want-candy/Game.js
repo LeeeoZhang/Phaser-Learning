@@ -38,7 +38,7 @@ Candy.Game.prototype.managePause = function(){
     let pauseText
     this.game.paused = true
     pauseText = this.add.text(100,250,"Game pause. \nTap anywhere to continue.",this.fontStyle)
-    this.input.onDown.add(function(){
+    this.input.onDown.addOnces(function(){
         pauseText.destroy()
         this.game.paused = false
     },this)
@@ -64,21 +64,29 @@ Candy.item = {
         let dropPos = Math.floor(Math.random()*Candy.GAME_WIDTH)
         let dropOffset = [-27,-36,-36,-38,-48]
         let candyType = Math.floor(Math.random()*5)
-        let candy = game.add.sprite(dropPos,dropOffset[candyType],'candy')
-        candy.animations.add('anim',[candyType],10,true)
-        candy.animations.play('anim')
-
-        game.physics.enable(candy,Phaser.Physics.ARCADE)
-        candy.inputEnabled = true
-        candy.events.onInputDown.add(this.clickCandy,this)
-
-        candy.checkWorldBounds = true
-        candy.events.onOutOfBounds.add(this.removeCandy,this)
-        candy.anchor.setTo(0.5,0.5)
-        candy.rotateMe = (Math.random()*4) - 2
-        game.candyGoup.add(candy)
+        //不断生成,浪费内存
+        // let candy = game.add.sprite(dropPos,dropOffset[candyType],'candy')
+        //使用糖果池
+        let candy = game.candyGoup.getFirstExists(false)
+        if(candy === null) {
+            candy = game.add.sprite(dropPos,dropOffset[candyType],'candy')
+            game.physics.enable(candy,Phaser.Physics.ARCADE)
+            candy.inputEnabled = true
+            candy.events.onInputDown.add(this.clickCandy,this)
+            candy.checkWorldBounds = true
+            candy.events.onOutOfBounds.add(this.removeCandy,this)
+            candy.anchor.setTo(0.5,0.5)
+            game.candyGoup.add(candy)
+        } else {
+            candy.reset(dropPos,dropOffset[candyType])
+            candy.animations.add('anim',[candyType],10,true)
+            candy.animations.play('anim')
+            candy.rotateMe = (Math.random()*4) - 2
+        }
     },
     clickCandy(candy){
+        //kill和destroy的区别
+        //因为使用了糖果池,因此使用kill方法,复用对象
         candy.kill()
         Candy.score += 1
         Candy.scoreText.setText(Candy.score)
